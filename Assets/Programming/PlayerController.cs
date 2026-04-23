@@ -1,17 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
-using UnityEngine.Rendering;
+using TMPro;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
+    [Header("References")]
     public Slider speedMeter;
     public Camera playerCamera;
+    public GameObject respawnPoint;
+    public TMP_Text machText;
 
+    [Header("Variables")]
     public float walkSpeed;
-
     public float diveSpeed;
 
     public float minSpeed;
@@ -23,9 +24,12 @@ public class PlayerController : MonoBehaviour
     public float lookSpeed;
     public float lookXLimit;
 
+    private int machLevel = 1;
+
     [SerializeField] private float currentOrbs;
     [SerializeField] private float maxOrbs;
 
+    [Header("Movement")]
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
@@ -42,7 +46,9 @@ public class PlayerController : MonoBehaviour
         speedMeter.value = currentOrbs;
         speedMeter.maxValue = maxOrbs;
 
-        minSpeed = walkSpeed; 
+        minSpeed = walkSpeed;
+
+        machText.text = "Mach " + machLevel.ToString();
     }
 
     void Update()
@@ -72,6 +78,7 @@ public class PlayerController : MonoBehaviour
         {
             walkSpeed = minSpeed;
         }
+
         #endregion
 
         #region Handles Jumping
@@ -109,6 +116,14 @@ public class PlayerController : MonoBehaviour
         }
 
         #endregion
+
+        #region Handles Respawning
+        if (transform.position.y < -20)
+        {
+            transform.position = respawnPoint.transform.position;
+        }
+
+        #endregion
     }
 
     private void OnTriggerEnter(Collider other)
@@ -120,6 +135,14 @@ public class PlayerController : MonoBehaviour
                 currentOrbs = 0;
 
                 speedMeter.value = currentOrbs;
+
+                machLevel += 1;
+
+                walkSpeed += machLevel * 5;
+
+                maxSpeed += 10;
+
+                machText.text = "Mach " + machLevel.ToString();
             }
 
             else
