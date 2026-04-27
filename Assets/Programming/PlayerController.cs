@@ -1,6 +1,9 @@
 using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -9,7 +12,9 @@ public class PlayerController : MonoBehaviour
     public Slider speedMeter;
     public Camera playerCamera;
     public GameObject respawnPoint;
-    public TMP_Text machText;
+
+    public TMP_Text speedLevelText;
+    public TMP_Text speedText;
 
     [Header("Variables")]
     public float walkSpeed;
@@ -24,13 +29,17 @@ public class PlayerController : MonoBehaviour
     public float lookSpeed;
     public float lookXLimit;
 
-    private int machLevel = 1;
+    private int speedLevel = 1;
 
     [SerializeField] private float currentOrbs;
     [SerializeField] private float maxOrbs;
 
     [Header("Movement")]
     Vector3 moveDirection = Vector3.zero;
+
+    Vector3 lastPos;
+    Vector3 currentPos;
+
     float rotationX = 0;
 
     public bool canMove = true;
@@ -48,7 +57,7 @@ public class PlayerController : MonoBehaviour
 
         minSpeed = walkSpeed;
 
-        machText.text = "Mach " + machLevel.ToString();
+        speedLevelText.text = "Speed Level " + speedLevel.ToString();
     }
 
     void Update()
@@ -68,6 +77,8 @@ public class PlayerController : MonoBehaviour
         {
             walkSpeed += Time.deltaTime * 5;
 
+            speedText.text = walkSpeed.ToString() + " m/s";
+
             if (walkSpeed >= maxSpeed)
             {
                 walkSpeed = maxSpeed;
@@ -77,6 +88,8 @@ public class PlayerController : MonoBehaviour
         else
         {
             walkSpeed = minSpeed;
+
+            speedText.text = "0 m/s";
         }
 
         #endregion
@@ -120,7 +133,7 @@ public class PlayerController : MonoBehaviour
         #region Handles Respawning
         if (transform.position.y < -20)
         {
-            transform.position = respawnPoint.transform.position;
+            SceneManager.LoadScene("SampleScene");
         }
 
         #endregion
@@ -136,13 +149,14 @@ public class PlayerController : MonoBehaviour
 
                 speedMeter.value = currentOrbs;
 
-                machLevel += 1;
+                speedLevel += 1;
 
-                walkSpeed += machLevel * 5;
+                walkSpeed += speedLevel * 5;
 
+                minSpeed += 5;
                 maxSpeed += 10;
 
-                machText.text = "Mach " + machLevel.ToString();
+                speedLevelText.text = "Speed Level " + speedLevel.ToString();
             }
 
             else
@@ -151,6 +165,25 @@ public class PlayerController : MonoBehaviour
 
                 speedMeter.value = currentOrbs;
             }
+
+            Destroy(other.gameObject);
+        }
+
+        if (other.gameObject.CompareTag("Super Orb"))
+        {
+            currentOrbs = 0;
+
+
+            speedMeter.value = currentOrbs;
+
+            speedLevel += 1;
+
+            walkSpeed += speedLevel * 5;
+
+            minSpeed += 5;
+            maxSpeed += 10;
+
+            speedLevelText.text = "Speed Level " + speedLevel.ToString();
 
             Destroy(other.gameObject);
         }
